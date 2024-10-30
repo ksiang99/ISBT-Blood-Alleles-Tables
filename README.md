@@ -1,3 +1,11 @@
+### **proj_jy_tables.py**
+Combine text files from [reference database](https://github.com/xgao32/project_jy/tree/master/02_reference_database/db_genomeAnno) into 1 dataframe. File is unable to run on NUS HPC as function df.explode is not available in the older version of pandas.
+
+### **Extracted_Blood_Alleles_Table.xlsx**
+Output of proj_jy_tables.py
+
+# Ignore below
+
 # ISBT Blood Alleles Tables
 
 ## **Files** 
