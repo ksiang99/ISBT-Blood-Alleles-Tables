@@ -14,6 +14,12 @@ def find_chromosome(genes):
 
     return ', '.join(chromosomes) if chromosomes else '-'  # Return chromosomes or '-'
 
+# Function to extract numeric values from the hg38_position and hg19_position
+def extract_numeric(pos):
+    if pos == '-':
+        return '-'
+    return re.sub(r'(_.*|-.*|>.*|\D)', '', pos) 
+
 txt_folder = "project_jy database" # Define the folder containing blood group database
 
 # Check if the folder exists
@@ -49,8 +55,8 @@ for txt_file in txt_files:
             #'Exon' : extracted_df.iloc[:, 7],
             #'Prevalence' : extracted_df.iloc[:, 8],
             #'Database' : extracted_df.iloc[:, 9],
-            'hg38_position' : extracted_df.iloc[:, 10],
-            'hg19_position' : extracted_df.iloc[:, 11],
+            'hg38_coordinates' : extracted_df.iloc[:, 10],
+            'hg19_coordinates' : extracted_df.iloc[:, 11],
             #'Comments' : extracted_df.iloc[:, 12]
             })
     except IndexError:
@@ -62,7 +68,7 @@ combined_df = combined_df.fillna("-") # Fill empty cells with "-"
 
 # Each phenotype may be associated with > 1 SNP (therefore > 1 hg38_position and hg19_position)
 # Split the string such that one row has only 1 nucleotide change, hg38_position and hg19_position
-columns_to_explode = ['Nucleotide_change', 'hg38_position', 'hg19_position']
+columns_to_explode = ['Nucleotide_change', 'hg38_coordinates', 'hg19_coordinates']
 for col in columns_to_explode:
     combined_df[col] = combined_df[col].apply(lambda x: [s for s in re.split(r';+', x) if s])
 
@@ -98,6 +104,11 @@ chr_gene_map = {
 
 combined_df['Chromosome'] = combined_df['GENE'].apply(find_chromosome) # Add Chromosome number at last column
 combined_df = combined_df.apply(lambda col: col.map(lambda x: x.lstrip() if isinstance(x, str) else x)) # Remove leading whitespace in every column 
+
+# Extract coordinates from 'hg38_coordinates' and 'hg19_coordinates'
+combined_df['hg38_start'] = combined_df['hg38_coordinates'].apply(extract_numeric)
+combined_df['hg19_start'] = combined_df['hg19_coordinates'].apply(extract_numeric)
+combined_df = combined_df.fillna("-") # Fill empty cells with "-" 
 
 # Save the combined_df into an excel
 combined_df.to_excel('project_jy_tables.xlsx', index=False)
